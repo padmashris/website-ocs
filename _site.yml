@@ -1,24 +1,25 @@
-name: OTTR Template Website
+name: Open Case Studies
 output_dir: 'docs'
 navbar:
-  title: OTTR Web
+  title: Open Case Studies
   left:
   - text: ""
     href: index.html
     icon: fa-home
-  - text: 1. Setup
+  - text: About
     href: setup.html
-  - text: 2. Hosting
+  - text: Survey
     href: hosting.html
-  - text: Editing
+  - text: Blog
     href: editing.html
-  - text: 3. Style
+  - text: Team
     href: style.html
-  - text: 4. Git Actions
+  - text: Talks
     href: git_actions.html
-  - text: More ottr docs
-    href: https://www.ottrproject.org/
-
+  - text: Contact
+    href: https://www.opencasestudies.org/
+  - text: Open Case Study Search
+    href: https://www.opencasestudies.org/ 
 
 output:
   html_document:
