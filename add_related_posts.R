@@ -1,0 +1,80 @@
+# Script to add "Related Posts" section to all blog posts
+
+related_posts_code <- '
+## Related Posts
+```{r related-posts, echo=FALSE, results=\'asis\', message=FALSE, warning=FALSE}
+# Get all post files in the same directory
+all_posts <- list.files(".", pattern = "\\\\.Rmd$", full.names = FALSE)
+current_file <- knitr::current_input()
+
+# Remove current post and _index files
+other_posts <- setdiff(all_posts, c(current_file, "_index.Rmd"))
+
+if (length(other_posts) > 0) {
+  # Randomly select up to 3 posts
+  selected_posts <- sample(other_posts, min(3, length(other_posts)))
+  
+  cat(\'<div class="related-posts-section">\\n\')
+  cat(\'<div class="related-posts-grid">\\n\')
+  
+  for (post_file in selected_posts) {
+    # Extract metadata
+    lines <- readLines(post_file, warn = FALSE)
+    yaml_end <- which(lines == "---")[2]
+    
+    if (!is.na(yaml_end)) {
+      yaml_lines <- lines[2:(yaml_end-1)]
+      
+      # Extract title
+      title_line <- yaml_lines[grep("^title:", yaml_lines)]
+      title <- if (length(title_line) > 0) {
+        gsub("title:\\\\s*[\'\\"]?|[\'\\"]?$", "", title_line[1])
+      } else {
+        "Untitled Post"
+      }
+      
+      # Extract date
+      date_line <- yaml_lines[grep("^date:", yaml_lines)]
+      date <- if (length(date_line) > 0) {
+        gsub("date:\\\\s*[\'\\"]?|[\'\\"]?$", "", date_line[1])
+      } else {
+        ""
+      }
+      
+      html_file <- gsub("\\\\.Rmd$", ".html", post_file)
+      
+      cat(sprintf(\'<div class="related-post-card">
+<h3><a href="%s">%s</a></h3>
+<div class="post-date">%s</div>
+</div>\\n\', html_file, title, date))
+    }
+  }
+  
+  cat(\'</div>\\n\')
+  cat(\'</div>\\n\')
+}
+```
+'
+
+# Get all blog post files
+post_files <- list.files("post", pattern = "\\.Rmd$", full.names = TRUE)
+
+# Process each file
+for (file in post_files) {
+  # Read the file
+  content <- readLines(file, warn = FALSE)
+  
+  # Check if "Related Posts" already exists
+  if (!any(grepl("## Related Posts", content))) {
+    # Append the related posts code
+    content <- c(content, "", related_posts_code)
+    
+    # Write back to file
+    writeLines(content, file)
+    cat("Added Related Posts to:", basename(file), "\n")
+  } else {
+    cat("Skipped (already has Related Posts):", basename(file), "\n")
+  }
+}
+
+cat("\nChecked", length(post_files), "files.\n")

@@ -11,6 +11,65 @@ header:
   caption: ''
   image: ''
   preview: yes
+output:
+  html_document:
+    css: ../styles.css
 ---
  
 The Johns Hopkins Data Science Lab is seeking a Master’s student to assist with a project to create interactive elements for existing data science/public health/statistics education material as part of the open case studies project (https://opencasestudies.github.io/). This role would also involve creating websites and packages in R to make our materials more accessible to others, as well as some research to assess the utility of our materials in the classroom. We have budgeted for financial support for this student, and this work could potentially be used as a thesis project. Please contact Carrie Wright (cwrigh60@jh.edu) if you are interested in learning more!
+
+
+## Related Posts
+```{r related-posts, echo=FALSE, results='asis', message=FALSE, warning=FALSE}
+# Get all post files in the same directory
+all_posts <- list.files(".", pattern = "\\.Rmd$", full.names = FALSE)
+current_file <- knitr::current_input()
+
+# Remove current post and _index files
+other_posts <- setdiff(all_posts, c(current_file, "_index.Rmd"))
+
+if (length(other_posts) > 0) {
+  # Randomly select up to 3 posts
+  selected_posts <- sample(other_posts, min(3, length(other_posts)))
+  
+  cat('<div class="related-posts-section">\n')
+  cat('<div class="related-posts-grid">\n')
+  
+  for (post_file in selected_posts) {
+    # Extract metadata
+    lines <- readLines(post_file, warn = FALSE)
+    yaml_end <- which(lines == "---")[2]
+    
+    if (!is.na(yaml_end)) {
+      yaml_lines <- lines[2:(yaml_end-1)]
+      
+      # Extract title
+      title_line <- yaml_lines[grep("^title:", yaml_lines)]
+      title <- if (length(title_line) > 0) {
+        gsub("title:\\s*['\"]?|['\"]?$", "", title_line[1])
+      } else {
+        "Untitled Post"
+      }
+      
+      # Extract date
+      date_line <- yaml_lines[grep("^date:", yaml_lines)]
+      date <- if (length(date_line) > 0) {
+        gsub("date:\\s*['\"]?|['\"]?$", "", date_line[1])
+      } else {
+        ""
+      }
+      
+      html_file <- gsub("\\.Rmd$", ".html", post_file)
+      
+      cat(sprintf('<div class="related-post-card">
+<h3><a href="%s">%s</a></h3>
+<div class="post-date">%s</div>
+</div>\n', html_file, title, date))
+    }
+  }
+  
+  cat('</div>\n')
+  cat('</div>\n')
+}
+```
+
