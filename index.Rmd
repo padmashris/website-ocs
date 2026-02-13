@@ -1,5 +1,182 @@
 ---
-# Homepage
-type: "widget_page"
-headless: true   # Homepage is headless, other widget pages are not.
+title: "Open Case Studies"
 ---
+
+```{css, echo=FALSE}
+html {
+  scroll-behavior: smooth;
+}
+
+/* Section styling */
+.section {
+  min-height: 10vh;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  align-items: left;
+}
+
+.section-about {
+  background: #f9f9f9;
+}
+
+.section-survey {
+  background: #fff;
+}
+
+.section-blog {
+  background: rgba(35, 138, 141, 0.05);
+}
+
+.section h2 {
+  color: #238A8D;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.section-content {
+  max-width: 900px;
+  text-align: left;
+}
+
+/* Hero section */
+.hero {
+  min-height: 30vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #238A8D 0%, #1a6d70 100%);
+  color: white;
+  text-align: center;
+  padding: 10px 20px;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  margin-bottom: 0px;
+}
+
+.hero p {
+  font-size: 1.3rem;
+  margin-bottom: 0px;
+  opacity: 0.95;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 15px 30px;
+  background: white;
+  color: #238A8D;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  margin: 10px;
+  transition: transform 0.2s;
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+```
+
+
+<div class="hero">
+<h1>Open Case Studies</h1>
+<p>Real-world data science education through hands-on case studies</p>
+<div>
+<a href="#about" class="cta-button">Learn More</a>
+<a href="#blog" class="cta-button">Latest Updates</a>
+</div>
+</div>
+
+<div id="about" class="section section-about">
+<div class="section-content">
+
+```{r child='setup.Rmd', echo=FALSE}
+```
+
+<!-- <a href="setup.html" class="btn-primary">Read More →</a> -->
+
+</div>
+</div>
+
+<div id="survey" class="section section-survey">
+<div class="section-content">
+
+## Survey
+
+Help us improve Open Case Studies by sharing your feedback.
+
+<a href="survey.html" class="btn-primary">Take Survey →</a>
+
+</div>
+</div>
+
+<div id="blog" class="section section-blog">
+<div class="section-content">
+
+## Latest from Our Blog
+```{r latest-posts, echo=FALSE, results='asis'}
+# Get 3 most recent posts
+post_files <- list.files("post", pattern = "\\.Rmd$", full.names = TRUE)
+
+# Extract metadata function (simplified version)
+extract_metadata <- function(file) {
+  lines <- readLines(file, warn = FALSE)
+  yaml_start <- which(lines == "---")[1]
+  yaml_end <- which(lines == "---")[2]
+  
+  if (is.na(yaml_start) || is.na(yaml_end)) return(NULL)
+  
+  yaml_lines <- lines[(yaml_start + 1):(yaml_end - 1)]
+  
+  # Extract title and date
+  title_line <- yaml_lines[grep("^title:", yaml_lines)]
+  title <- if (length(title_line) > 0) {
+    gsub("title:\\s*['\"]?|['\"]?$", "", title_line[1])
+  } else "Untitled"
+  
+  date_line <- yaml_lines[grep("^date:", yaml_lines)]
+  date <- if (length(date_line) > 0) {
+    gsub("date:\\s*['\"]?|['\"]?$", "", date_line[1])
+  } else "No date"
+  
+  html_file <- paste0("post/", gsub("\\.Rmd$", ".html", basename(file)))
+  
+  list(
+    title = title,
+    date = date,
+    file = html_file,
+    sort_date = tryCatch(as.Date(date), error = function(e) Sys.Date())
+  )
+}
+
+# Get posts
+posts <- lapply(post_files, extract_metadata)
+posts <- posts[!sapply(posts, is.null)]
+posts <- posts[order(sapply(posts, function(x) x$sort_date), decreasing = TRUE)]
+
+# Show top 3
+posts <- head(posts, 3)
+
+cat('<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">\n')
+
+for (post in posts) {
+  cat(sprintf('
+<div class="post-card">
+<h3><a href="%s">%s</a></h3>
+<div class="post-date">%s</div>
+</div>
+  ', post$file, post$title, post$date))
+}
+
+cat('</div>\n')
+```
+
+<a href="blog.html" class="btn-primary">View All Posts →</a>
+
+</div>
+</div>
